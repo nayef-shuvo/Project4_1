@@ -1,17 +1,14 @@
-﻿using System.ComponentModel.DataAnnotations.Schema;
-using System.ComponentModel.DataAnnotations;
+﻿using System.ComponentModel.DataAnnotations;
 
 namespace Project4_1.Models
 {
     public class Teacher
     {
-        [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
-        [Key]
-        public Guid Id { get; } = Guid.NewGuid();
 
         [Required]
         public string Name { get; set; } = string.Empty;
 
+        [Key]
         [Required]
         [EmailAddress]
         public string Email { get; set; } = string.Empty;

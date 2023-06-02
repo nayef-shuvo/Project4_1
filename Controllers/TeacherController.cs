@@ -33,7 +33,7 @@ namespace Project4_1.Controllers
         [HttpPost]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        public ActionResult<Teacher> Add(SignUpDto request)
+        public ActionResult<Teacher> Add(RegisterDto request)
         {
             if (!ModelState.IsValid)
             {

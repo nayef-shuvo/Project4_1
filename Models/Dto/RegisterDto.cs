@@ -2,7 +2,7 @@
 
 namespace Project4_1.Models.Dto
 {
-    public class SignUpDto
+    public class RegisterDto
     {
         [Required]
         public string Name { get; set; } = string.Empty;
