@@ -10,8 +10,8 @@ using Project4_1.Data;
 namespace Project4_1.Migrations
 {
     [DbContext(typeof(TeacherDbContext))]
-    [Migration("20230602165056_initial_migrations")]
-    partial class initial_migrations
+    [Migration("20230602175236_initial_migrarion")]
+    partial class initial_migrarion
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)

@@ -1,4 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
+using Project4_1.Data;
 using Project4_1.Models;
 using Project4_1.Models.Dto;
 
@@ -8,21 +10,26 @@ namespace Project4_1.Controllers
     [Route("/api/[controller]")]
     public class TeacherController : ControllerBase
     {
-        private static readonly List<Teacher> _teachers = new List<Teacher>();
+        private readonly TeacherDbContext _context;
+        public TeacherController(TeacherDbContext context)
+        {
+            _context = context;
+        }
 
         [HttpGet]
         [ProducesResponseType(StatusCodes.Status200OK)]
-        public ActionResult<List<Teacher>> GetAll()
+        public async Task<ActionResult<List<Teacher>>> GetAll()
         {
-            return Ok(_teachers);
+            var list = await _context.Teachers.ToListAsync();
+            return Ok(list);
         }
 
         [HttpGet("email")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
-        public ActionResult<Teacher> Get(string emil)
+        public async Task<ActionResult<Teacher>> Get(string emil)
         {
-            var temp = _teachers.FirstOrDefault(x => x.Email == emil);
+            var temp = await _context.Teachers.FirstOrDefaultAsync(x => x.Email == emil);
             if (temp == null) 
             {
                 return NotFound();
@@ -33,14 +40,14 @@ namespace Project4_1.Controllers
         [HttpPost]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        public ActionResult<Teacher> Add(RegisterDto request)
+        public async Task<ActionResult<Teacher>> Add(RegisterDto request)
         {
             if (!ModelState.IsValid)
             {
                 return BadRequest();
             }
             // Checking mail
-            var temp = _teachers.FirstOrDefault(x => x.Email == request.Email);
+            var temp = await _context.Teachers.FirstOrDefaultAsync(x => x.Email == request.Email);
             if (temp != null)
             {
                 return BadRequest("Email already exist");
@@ -54,20 +61,21 @@ namespace Project4_1.Controllers
                 Rank = request.Rank,
             };
 
-            _teachers.Add(teacher);
+            await _context.Teachers.AddAsync(teacher);
+            await _context.SaveChangesAsync();
             return Ok(teacher);
         }
 
         [HttpPut]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        public ActionResult<Teacher> Update(Teacher request)
+        public async Task<ActionResult<Teacher>> Update(Teacher request)
         {
             if (!ModelState.IsValid) 
             {
                 return BadRequest();
             }
-            var temp = _teachers.FirstOrDefault(y => y.Email == request.Email);
+            var temp = await _context.Teachers.FirstOrDefaultAsync(y => y.Email == request.Email);
             if (temp == null)
             {
                 return BadRequest();
@@ -77,7 +85,21 @@ namespace Project4_1.Controllers
             temp.Phone = request.Phone;
             temp.Rank = request.Rank;
 
+            await _context.SaveChangesAsync();
             return Ok(temp);
+        }
+
+        [HttpDelete]
+        public async Task<IActionResult> Delete(string email)
+        {
+            var temp = await _context.Teachers.FirstOrDefaultAsync(y => y.Email == email);
+            if (temp == null)
+            {
+                return BadRequest();
+            }
+            _context.Teachers.Remove(temp);
+            await _context.SaveChangesAsync();
+            return NoContent();
         }
     }
 }
