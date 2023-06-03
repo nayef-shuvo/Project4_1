@@ -9,8 +9,13 @@ builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
+// Teachers database
 builder.Services.AddDbContext<TeacherDbContext>(options => 
 options.UseSqlite(builder.Configuration.GetConnectionString("DefaultConnection")));
+
+//Passward database
+builder.Services.AddDbContext<PasswordDbContext>(options =>
+options.UseSqlite(builder.Configuration.GetConnectionString("PasswordHashConnection")));
 
 var app = builder.Build();
 
