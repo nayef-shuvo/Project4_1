@@ -5,6 +5,7 @@ using Microsoft.IdentityModel.Tokens;
 using Project4_1.Data;
 using Project4_1.Models;
 using Project4_1.Models.Dto;
+using System.Collections;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Security.Cryptography;
@@ -14,7 +15,7 @@ namespace Project4_1.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
-    public class AuthController : Controller
+    public class AuthController : ControllerBase
     {
         private readonly IConfiguration _config;
         private readonly ApplicationDbContext _dbContext;
@@ -59,9 +60,16 @@ namespace Project4_1.Controllers
             return Ok(teacher);
         }
 
+        [HttpGet]
+        public async Task<IActionResult> GetAll()
+        {
+            return Ok(await _dbContext.AuthDatabse.ToListAsync());
+        }
+
+
         [AllowAnonymous]
-        [HttpPost("/login")]
-        public async Task<IActionResult> Login([FromBody] LoginDto login)
+        [HttpGet("/login")]
+        public async Task<IActionResult> Login([FromQuery] LoginDto login)
         {
             if (!ModelState.IsValid)
             {
@@ -76,17 +84,15 @@ namespace Project4_1.Controllers
             return Ok("Login successfully");
         }
 
-        private (string, string) GenerateHashAndSalt(string password)
+        private (byte[], byte[]) GenerateHashAndSalt(string password)
         {
-            string? salt;
-            string? hash;
-
             using (var hmac = new HMACSHA512())
             {
-                salt = hmac.Key.ToString();
-                hash = hmac.ComputeHash(Encoding.UTF8.GetBytes(password)).ToString();
+                var salt = hmac.Key;
+                var hash = hmac.ComputeHash(Encoding.UTF8.GetBytes(password));
+
+                return (hash,  salt);
             }
-            return (hash, salt)!;
         }
 
         private async Task<bool> Verify(LoginDto loginDto)
@@ -96,20 +102,28 @@ namespace Project4_1.Controllers
             {
                 return false;
             }
+
             var hashAndSalt = await _dbContext.AuthDatabse.AsNoTracking().FirstOrDefaultAsync(x => x.Id == teacher.Id);
             if (hashAndSalt == null)
             {
                 return false;
             }
 
-            using (var hmac = new HMACSHA512(Encoding.UTF8.GetBytes(hashAndSalt.PasswordSalt)))
+            using (var hmac = new HMACSHA512(hashAndSalt.PasswordSalt))
             {
-                var hash = hmac.ComputeHash(Encoding.UTF8.GetBytes(loginDto.Password)).ToString();
+                var computedHash = hmac.ComputeHash(Encoding.UTF8.GetBytes(loginDto.Password));
 
-                if (hash == hashAndSalt.PasswordHash) return true;
+                // Compare byte arrays
+                if (computedHash.SequenceEqual(hashAndSalt.PasswordHash))
+                {
+                    return true;
+                }
             }
+
             return false;
         }
+
+
 
 
         private string Generate(Teacher teacher)

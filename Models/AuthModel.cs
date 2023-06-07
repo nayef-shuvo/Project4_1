@@ -9,9 +9,9 @@ namespace Project4_1.Models
         public string Id { get; set; } = string.Empty;
 
         [Required]
-        public string PasswordHash { get; set; } = string.Empty;
+        public byte[] PasswordHash { get; set; }
 
         [Required]
-        public string PasswordSalt { get; set; } = string.Empty;
+        public byte[] PasswordSalt { get; set; }
     }
 }

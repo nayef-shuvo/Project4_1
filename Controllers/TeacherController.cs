@@ -88,5 +88,23 @@ namespace Project4_1.Controllers
 
             return Ok(temp);
         }
+
+        [HttpDelete]
+        public async Task<IActionResult> Delete(string id)
+        {
+            var teacher = await _dbContext.TeacherDatabse.FirstOrDefaultAsync(x => x.Id == id);
+            var auth = await _dbContext.AuthDatabse.FirstOrDefaultAsync(x => x.Id == id);
+
+            if (teacher == null || auth == null) 
+            {
+                return BadRequest();
+            }
+
+            _dbContext.TeacherDatabse.Remove(teacher);
+            _dbContext.AuthDatabse.Remove(auth);
+            await _dbContext.SaveChangesAsync();
+
+            return NoContent();
+        }
     }
 }
