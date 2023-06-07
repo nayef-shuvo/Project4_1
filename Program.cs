@@ -1,5 +1,7 @@
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Project4_1.Data;
+using System.Security.Principal;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -14,8 +16,11 @@ builder.Services.AddDbContext<TeacherDbContext>(options =>
 options.UseSqlite(builder.Configuration.GetConnectionString("DefaultConnection")));
 
 //Passward database
-builder.Services.AddDbContext<PasswordDbContext>(options =>
-options.UseSqlite(builder.Configuration.GetConnectionString("PasswordHashConnection")));
+builder.Services.AddDbContext<AuthDbContext>(options => 
+options.UseSqlite(builder.Configuration.GetConnectionString("AuthConnection")));
+
+builder.Services.AddIdentity<IdentityUser, IdentityRole>().AddEntityFrameworkStores<AuthDbContext>();
+
 
 var app = builder.Build();
 
@@ -27,6 +32,8 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
+
+app.UseAuthentication();
 
 app.UseAuthorization();
 

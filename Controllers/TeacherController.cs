@@ -11,9 +11,11 @@ namespace Project4_1.Controllers
     public class TeacherController : ControllerBase
     {
         private readonly TeacherDbContext _context;
-        public TeacherController(TeacherDbContext context)
+        private readonly AuthDbContext _passwordContext;
+        public TeacherController(TeacherDbContext context, AuthDbContext passwordContext)
         {
             _context = context;
+            _passwordContext = passwordContext;
         }
 
         [HttpGet]
@@ -21,6 +23,13 @@ namespace Project4_1.Controllers
         public async Task<ActionResult<List<Teacher>>> GetAll()
         {
             var list = await _context.Teachers.ToListAsync();
+            return Ok(list);
+        }
+        [Route("api/hash")]
+        [HttpGet]
+        public async Task<IActionResult> GetHash()
+        {
+            var list = await _passwordContext.PasswordHashes.ToListAsync();
             return Ok(list);
         }
 
@@ -35,35 +44,6 @@ namespace Project4_1.Controllers
                 return NotFound();
             }
             return Ok(temp);
-        }
-
-        [HttpPost]
-        [ProducesResponseType(StatusCodes.Status200OK)]
-        [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        public async Task<ActionResult<Teacher>> Add(RegisterDto request)
-        {
-            if (!ModelState.IsValid)
-            {
-                return BadRequest();
-            }
-            // Checking mail
-            var temp = await _context.Teachers.FirstOrDefaultAsync(x => x.Email == request.Email);
-            if (temp != null)
-            {
-                return BadRequest("Email already exist");
-            }
-
-            Teacher teacher = new()
-            { 
-                Name = request.Name,
-                Email = request.Email,
-                Phone = request.Phone,
-                Rank = request.Rank,
-            };
-
-            await _context.Teachers.AddAsync(teacher);
-            await _context.SaveChangesAsync();
-            return Ok(teacher);
         }
 
         [HttpPut]
@@ -93,13 +73,57 @@ namespace Project4_1.Controllers
         public async Task<IActionResult> Delete(string email)
         {
             var temp = await _context.Teachers.FirstOrDefaultAsync(y => y.Email == email);
-            if (temp == null)
+            var password = await _passwordContext.PasswordHashes.FirstOrDefaultAsync(password => password.Email == email);
+
+            if (temp == null || password == null)
             {
                 return BadRequest();
             }
             _context.Teachers.Remove(temp);
             await _context.SaveChangesAsync();
+
+            _passwordContext.PasswordHashes.Remove(password);
+            await _passwordContext.SaveChangesAsync();
+
+
             return NoContent();
         }
+
+        [Route("/login")]
+        [HttpGet]
+        public async Task<IActionResult> Login([FromQuery] LoginDto loginDto)
+        {
+            var password = await _passwordContext.PasswordHashes.AsNoTracking().FirstOrDefaultAsync(
+                x => x.Email == loginDto.Email);
+
+            if (password == null)
+            {
+                return BadRequest("Wrong email");
+            }
+            //var isMatched = Verify(loginDto.Password, password.Hash, password.Salt);
+            //if (!isMatched)
+            //{
+            //    return BadRequest("Wrong password");
+            //}
+            var teacher = await _context.Teachers.AsNoTracking().FirstOrDefaultAsync(
+                x => x.Email == password.Email);
+            return Ok(  );
+
+        }
+
+        [Route("/pass")]
+        [HttpGet]
+        public async Task<IActionResult> GetPass(string email)
+        {
+            var password = await _passwordContext.PasswordHashes.FirstOrDefaultAsync(x => x.Email == email);
+            if (password == null)
+            {
+                return BadRequest();
+            }
+            return Ok(password);
+        }
+
+        
+
     }
 }

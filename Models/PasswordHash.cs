@@ -8,6 +8,8 @@ namespace Project4_1.Models
         [Required]
         public string Email { get; set; } = string.Empty;
         [Required]
-        public string Hash { get; set; } = string.Empty;
+        public byte[] Hash { get; set; }
+        [Required]
+        public byte[] Salt { get; set; }
     }
 }
