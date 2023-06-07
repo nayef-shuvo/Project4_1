@@ -1,4 +1,5 @@
-﻿using System.ComponentModel.DataAnnotations.Schema;
+﻿using System;
+using System.ComponentModel.DataAnnotations.Schema;
 using System.ComponentModel.DataAnnotations;
 
 namespace Project4_1.Models
@@ -7,7 +8,8 @@ namespace Project4_1.Models
     {
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         [Key]
-        public Guid Id { get; } = Guid.NewGuid();
+        [Required]
+        public string Id { get; set; } = Guid.NewGuid().ToString();
 
         [Required]
         public string Name { get; set; } = string.Empty;
@@ -23,7 +25,6 @@ namespace Project4_1.Models
         [Required]
         public Rank Rank { get; set; }
 
-        public string Department { get; set; } = "CSE";
-
+        public string Role { get; set; } = "User";
     }
 }
