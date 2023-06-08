@@ -39,33 +39,6 @@ namespace Project4_1.Controllers
             return Ok(temp);
         }
 
-        //[HttpPost]
-        //[ProducesResponseType(StatusCodes.Status200OK)]
-        //[ProducesResponseType(StatusCodes.Status400BadRequest)]
-        //public ActionResult<Teacher> Add(RegisterDto request)
-        //{
-        //    if (!ModelState.IsValid)
-        //    {
-        //        return BadRequest();
-        //    }
-        //    // Checking mail
-        //    var temp = _teachers.FirstOrDefault(x => x.Email == request.Email);
-        //    if (temp != null)
-        //    {
-        //        return BadRequest("Email already exist");
-        //    }
-
-        //    Teacher teacher = new()
-        //    { 
-        //        Name = request.Name,
-        //        Email = request.Email,
-        //        Phone = request.Phone,
-        //        Rank = request.Rank,
-        //    };
-
-        //    _teachers.Add(teacher);
-        //    return Ok(teacher);
-        //}
 
         [HttpPut]
         [ProducesResponseType(StatusCodes.Status200OK)]
@@ -86,9 +59,13 @@ namespace Project4_1.Controllers
             temp.Phone = request.Phone;
             temp.Rank = request.Rank;
 
+            await _dbContext.SaveChangesAsync();
+
             return Ok(temp);
         }
 
+        [ProducesResponseType(StatusCodes.Status204NoContent)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [HttpDelete]
         public async Task<IActionResult> Delete(string id)
         {

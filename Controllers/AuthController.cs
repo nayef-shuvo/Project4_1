@@ -14,7 +14,7 @@ using System.Text;
 namespace Project4_1.Controllers
 {
     [ApiController]
-    [Route("api/[controller]")]
+    [Route("/api/[controller]")]
     public class AuthController : ControllerBase
     {
         private readonly IConfiguration _config;
@@ -28,13 +28,20 @@ namespace Project4_1.Controllers
         }
 
         [AllowAnonymous]
-        [HttpPost("/register")]
+        [HttpPost("register")]
         public async Task<IActionResult> Register(RegisterDto request)
         {
             if (!ModelState.IsValid)
             {
                 return BadRequest();
             }
+
+            var temp = await _dbContext.TeacherDatabse.AsNoTracking().FirstOrDefaultAsync(x => x.Email == request.Email);
+            if (temp != null)
+            {
+                return BadRequest("This email is already used");
+            }
+
             var (hash, salt) = GenerateHashAndSalt(request.Password);
 
             var teacher = new Teacher
@@ -60,28 +67,30 @@ namespace Project4_1.Controllers
             return Ok(teacher);
         }
 
-        [HttpGet]
-        public async Task<IActionResult> GetAll()
-        {
-            return Ok(await _dbContext.AuthDatabse.ToListAsync());
-        }
+        //[HttpGet]
+        //public async Task<IActionResult> GetAll()
+        //{
+        //    return Ok(await _dbContext.AuthDatabse.ToListAsync());
+        //}
 
 
         [AllowAnonymous]
-        [HttpGet("/login")]
-        public async Task<IActionResult> Login([FromQuery] LoginDto login)
+        [HttpGet("login")]
+        public async Task<IActionResult> Login([FromQuery] LoginDto loginDto)
         {
             if (!ModelState.IsValid)
             {
                 return BadRequest();
             }
-            bool isMatched = await Verify(login);
+            bool isMatched = await Verify(loginDto);
 
             if (!isMatched)
             {
                 return BadRequest("Email or password is invalid");
             }
-            return Ok("Login successfully");
+            var teacher = await _dbContext.TeacherDatabse.AsNoTracking().FirstOrDefaultAsync(x => x.Email == loginDto.Email);
+            var token = GenerateToken(teacher!);
+            return Ok(token);
         }
 
         private (byte[], byte[]) GenerateHashAndSalt(string password)
@@ -113,7 +122,6 @@ namespace Project4_1.Controllers
             {
                 var computedHash = hmac.ComputeHash(Encoding.UTF8.GetBytes(loginDto.Password));
 
-                // Compare byte arrays
                 if (computedHash.SequenceEqual(hashAndSalt.PasswordHash))
                 {
                     return true;
@@ -126,7 +134,7 @@ namespace Project4_1.Controllers
 
 
 
-        private string Generate(Teacher teacher)
+        private string GenerateToken(Teacher teacher)
         {
             var securityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_config["Jwt:Key"]!));
             var credentials = new SigningCredentials(securityKey, SecurityAlgorithms.HmacSha256);
@@ -137,6 +145,7 @@ namespace Project4_1.Controllers
                 new Claim(ClaimTypes.Name, teacher.Name),
                 new Claim(ClaimTypes.Email, teacher.Email),
                 new Claim(ClaimTypes.Role, teacher.Role),
+                new Claim(ClaimTypes.Role, teacher.Rank.ToString()),
                 new Claim(ClaimTypes.MobilePhone, teacher.Phone),
             };
 
