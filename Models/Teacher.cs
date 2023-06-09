@@ -1,6 +1,7 @@
 ﻿using System;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.ComponentModel.DataAnnotations;
+using Newtonsoft.Json.Serialization;
 
 namespace Project4_1.Models
 {
@@ -23,6 +24,7 @@ namespace Project4_1.Models
         public string Phone { get; set; } = string.Empty;
 
         [Required]
+        [EnumDataType(typeof (Rank))]
         public Rank Rank { get; set; }
 
         public string Role { get; set; } = "User";

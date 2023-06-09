@@ -15,12 +15,24 @@ namespace Project4_1.Migrations
                 columns: table => new
                 {
                     Id = table.Column<string>(type: "TEXT", nullable: false),
-                    PasswordHash = table.Column<string>(type: "TEXT", nullable: false),
-                    PasswordSalt = table.Column<string>(type: "TEXT", nullable: false)
+                    PasswordHash = table.Column<byte[]>(type: "BLOB", nullable: false),
+                    PasswordSalt = table.Column<byte[]>(type: "BLOB", nullable: false)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_AuthDatabse", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "ItemDatabse",
+                columns: table => new
+                {
+                    Title = table.Column<string>(type: "TEXT", maxLength: 100, nullable: false),
+                    SubItem = table.Column<string>(type: "TEXT", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_ItemDatabse", x => x.Title);
                 });
 
             migrationBuilder.CreateTable(
@@ -45,6 +57,9 @@ namespace Project4_1.Migrations
         {
             migrationBuilder.DropTable(
                 name: "AuthDatabse");
+
+            migrationBuilder.DropTable(
+                name: "ItemDatabse");
 
             migrationBuilder.DropTable(
                 name: "TeacherDatabse");
