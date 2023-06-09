@@ -14,7 +14,7 @@ using System.Text;
 namespace Project4_1.Controllers
 {
     [ApiController]
-    [Route("/api/[controller]")]
+    [Route("api/[controller]")]
     public class AuthController : ControllerBase
     {
         private readonly IConfiguration _config;
@@ -26,6 +26,8 @@ namespace Project4_1.Controllers
             _dbContext = dbContext;
 
         }
+
+        // POST api/Auth/register
 
         [AllowAnonymous]
         [HttpPost("register")]
@@ -67,12 +69,7 @@ namespace Project4_1.Controllers
             return Ok(teacher);
         }
 
-        //[HttpGet]
-        //public async Task<IActionResult> GetAll()
-        //{
-        //    return Ok(await _dbContext.AuthDatabse.ToListAsync());
-        //}
-
+        // api/Auth/login?Email=email&Password=password
 
         [AllowAnonymous]
         [HttpGet("login")]

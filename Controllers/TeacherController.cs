@@ -2,12 +2,11 @@
 using Microsoft.EntityFrameworkCore;
 using Project4_1.Data;
 using Project4_1.Models;
-using Project4_1.Models.Dto;
 
 namespace Project4_1.Controllers
 {
     [ApiController]
-    [Route("/api/[controller]")]
+    [Route("api/[controller]")]
     public class TeacherController : ControllerBase
     {
         private readonly ApplicationDbContext _dbContext;
@@ -17,6 +16,7 @@ namespace Project4_1.Controllers
             _dbContext = dbContext;
         }
 
+        // GET api/Teacher
         [HttpGet]
         [ProducesResponseType(StatusCodes.Status200OK)]
         public async Task<IActionResult> GetAll()
@@ -25,7 +25,8 @@ namespace Project4_1.Controllers
             return Ok(list);
         }
 
-        [HttpGet("email")]
+        // GET api/Teacher/email
+        [HttpGet("{email}")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         public async Task<IActionResult> GetByEmail(string email)
@@ -40,15 +41,21 @@ namespace Project4_1.Controllers
         }
 
 
-        [HttpPut]
+        // PUT /api/Teacher/id
+        [HttpPut("{id}")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        public async Task<IActionResult> Update(Teacher request)
+        public async Task<IActionResult> Update(string id, Teacher request)
         {
             if (!ModelState.IsValid) 
             {
-                return BadRequest();
+                return BadRequest(ModelState);
             }
+            if (id != request.Id)
+            {
+                return BadRequest("Id do not match");
+            }
+
             var temp = await _dbContext.TeacherDatabse.FirstOrDefaultAsync(y => y.Id == request.Id);
             if (temp == null)
             {
@@ -64,9 +71,10 @@ namespace Project4_1.Controllers
             return Ok(temp);
         }
 
+        // DELETE api/Teacher/id
+        [HttpDelete("{id}")]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        [HttpDelete]
         public async Task<IActionResult> Delete(string id)
         {
             var teacher = await _dbContext.TeacherDatabse.FirstOrDefaultAsync(x => x.Id == id);

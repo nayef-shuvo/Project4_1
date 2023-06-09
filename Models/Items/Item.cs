@@ -9,6 +9,6 @@ namespace Project4_1.Models.Items
         [Key]
         public string Title { get; set; } = string.Empty;
         [Required]
-        public Dictionary<string, int> SubItem { get; set; } = new Dictionary<string, int>();
+        public Dictionary<string, int> SubItem { get; set; }    
     }
 }
