@@ -21,17 +21,32 @@ namespace Project4_1.Migrations
                     b.Property<string>("Id")
                         .HasColumnType("TEXT");
 
-                    b.Property<string>("PasswordHash")
+                    b.Property<byte[]>("PasswordHash")
                         .IsRequired()
-                        .HasColumnType("TEXT");
+                        .HasColumnType("BLOB");
 
-                    b.Property<string>("PasswordSalt")
+                    b.Property<byte[]>("PasswordSalt")
                         .IsRequired()
-                        .HasColumnType("TEXT");
+                        .HasColumnType("BLOB");
 
                     b.HasKey("Id");
 
                     b.ToTable("AuthDatabse");
+                });
+
+            modelBuilder.Entity("Project4_1.Models.Items.Item", b =>
+                {
+                    b.Property<string>("Title")
+                        .HasMaxLength(100)
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("SubItem")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.HasKey("Title");
+
+                    b.ToTable("ItemDatabse");
                 });
 
             modelBuilder.Entity("Project4_1.Models.Teacher", b =>
